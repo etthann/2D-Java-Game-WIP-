@@ -4,7 +4,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.io.IOException;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -13,10 +12,10 @@ public class GamePanel extends JPanel implements Runnable  {
     private KeyHandler keyH = new KeyHandler();
     public Dimension screenSize;
     private int FPS = 20;
-    Player player = new Player(this, keyH);
-    TitleScreen ts = new TitleScreen(this);
-    int screen = 0;
-
+    private MouseHandler mouseH = new MouseHandler();
+    Player player = new Player(this, keyH, mouseH);
+    TitleScreen ts = new TitleScreen(this,mouseH);
+    int screenGame = 0;
 
     public GamePanel(JFrame window) {
         GraphicsDevice device = window.getGraphicsConfiguration().getDevice();
@@ -34,7 +33,9 @@ public class GamePanel extends JPanel implements Runnable  {
         this.setDoubleBuffered(true);
         this.setBackground(Color.black);
         this.addKeyListener(keyH);
+        this.addMouseListener(mouseH);
         this.setFocusable(true);
+        
     }
 
 
@@ -52,7 +53,6 @@ public class GamePanel extends JPanel implements Runnable  {
         long currentTime;
 
         while (gameThread != null) {
-
             currentTime = System.nanoTime();
             delta += (currentTime - lastTime)/interval;
             lastTime = currentTime;
@@ -70,10 +70,11 @@ public class GamePanel extends JPanel implements Runnable  {
         Graphics2D g2 = (Graphics2D) g;
         //Add Graphics Below
         try {
-            if (screen == 0) {
+            if (screenGame == 0) {
                 ts.draw(g2);
             }
-            if (screen == 1) {
+            if (screenGame == 1) {
+                
                 player.draw(g2);
             }
             

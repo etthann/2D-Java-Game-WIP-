@@ -8,11 +8,13 @@ public class Player extends Entitiy {
     GamePanel gp;
     KeyHandler keyH;
     String direction;
+    MouseHandler mouseH;
 
-    public Player(GamePanel gp, KeyHandler keyH) {
+    public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseH) {
         this.gp = gp;
         this.keyH = keyH;
         this.direction = "";
+        this.mouseH = mouseH;
         setDefaultValues();
     }
 
@@ -38,7 +40,7 @@ public class Player extends Entitiy {
         }
         if (!keyH.upPressed && !keyH.downPressed && !keyH.leftPressed && !keyH.rightPressed && !keyH.jumpPressed) {
             direction = "idle";
-        }
+        }  
     }
 
     public void draw(Graphics2D g2) throws IOException, InterruptedException {
@@ -91,13 +93,12 @@ public class Player extends Entitiy {
             }
         }
 
-        if (images != null && images.length > 0) { // Check if the images array is not null and has elements
+        if (images != null && images.length > 0) {
             currentFrame++;
             if (currentFrame >= images.length) {
                 currentFrame = 0;
             }
 
-            // Draw the appropriate image based on the current frame
             BufferedImage currentImage = images[currentFrame];
             if (keyH.leftPressed) {
                 g2.drawImage(currentImage, x + ((int) ((gp.screenSize.getWidth()) / 9)), y,
