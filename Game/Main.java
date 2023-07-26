@@ -1,8 +1,10 @@
+import java.io.IOException;
+
 import javax.swing.*;
 
 public class Main {
-    public static void main(String[] args) {
-        JFrame window = new JFrame("Zombie Game");
+    public static void main(String[] args) throws IOException {
+        JFrame window = new JFrame("Terraria Knockoff");
         GamePanel gamePanel = new GamePanel(window);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
@@ -14,3 +16,4 @@ public class Main {
         gamePanel.startGameThread();
     }
 }
+    

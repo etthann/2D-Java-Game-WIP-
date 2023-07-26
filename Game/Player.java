@@ -9,12 +9,20 @@ public class Player extends Entitiy {
     KeyHandler keyH;
     String direction;
     MouseHandler mouseH;
+    World world;
+    public boolean jump = true;
+    public boolean gravity = true;
+    public int grassTile = 0;
+    public int[][] nearTiles = new int[3][3];
+    public boolean collisionLeft;
+    public boolean collisionRight;
 
-    public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseH) {
+    public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseH, World world) {
         this.gp = gp;
         this.keyH = keyH;
         this.direction = "";
         this.mouseH = mouseH;
+        this.world = world;
         setDefaultValues();
     }
 
@@ -25,22 +33,56 @@ public class Player extends Entitiy {
         currentFrame = 0;
     }
 
+    public void ground() {
+        if (world.getTileBeneath(x, y) != 2) {
+            y += world.scale;
+        } else {
+            y += 0;
+        }
+
+        if (world.getTileLeft(x, y, 1) != 3 || world.getTileLeft(x, y, 2) != 3) {
+            collisionLeft = true;
+        } else {
+            collisionLeft = false;
+        }
+
+        if (world.getTileRight(x, y, 1) != 3 || world.getTileRight(x, y, 2) != 3) {
+            collisionRight = true;
+        } else {
+            collisionRight = false;
+        }
+        if (world.getTileUp(x, y) != 3) {
+            jump = false;
+        } else {
+            jump = true;
+        }
+        if (world.getTilePerson(x, y, 1) != 3 && world.getTilePerson(x, y, 2) != 3) {
+            collisionLeft = true;
+            collisionRight = true;
+        }
+    }
+
     public void update() {
-        if (keyH.leftPressed) {
+        ground();
+
+        if (keyH.leftPressed && !collisionLeft) {
             direction = "left";
             x -= speed;
+        } else {
+            direction = "left";
+            x -= 0;
         }
-        if (keyH.rightPressed) {
+        if (keyH.rightPressed && !collisionRight) {
             direction = "right";
             x += speed;
+        } else {
+            direction = "right";
+            x += 0;
         }
-        if (keyH.jumpPressed) {
-            direction = "jump";
-            jump();
-        }
+
         if (!keyH.upPressed && !keyH.downPressed && !keyH.leftPressed && !keyH.rightPressed && !keyH.jumpPressed) {
             direction = "idle";
-        }  
+        }
     }
 
     public void draw(Graphics2D g2) throws IOException, InterruptedException {
@@ -100,19 +142,18 @@ public class Player extends Entitiy {
             }
 
             BufferedImage currentImage = images[currentFrame];
+
+            // Adjust y-coordinate to appear on top of the grass
+            int offsetY = world.scale - world.scale / 2 - world.scale / 4; // Set the desired offset (height of the
+                                                                           // grass tiles)
             if (keyH.leftPressed) {
-                g2.drawImage(currentImage, x + ((int) ((gp.screenSize.getWidth()) / 9)), y,
-                        (int) ((gp.screenSize.getWidth() * -1) / 9),
-                        (int) (gp.screenSize.getHeight() / 7), null);
+                g2.drawImage(currentImage, x + world.scale * 2 + world.scale / 2, y - offsetY,
+                        world.scale * -3,
+                        world.scale * 3, null);
             } else {
-                g2.drawImage(currentImage, x, y, (int) (gp.screenSize.getWidth() / 9),
-                        (int) (gp.screenSize.getHeight() / 7), null);
+                g2.drawImage(currentImage, x - world.scale / 4, y - offsetY, world.scale * 3,
+                        world.scale * 3, null);
             }
         }
     }
-
-    public void jump() {
-
-    }
-
 }

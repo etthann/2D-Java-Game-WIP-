@@ -11,13 +11,14 @@ public class GamePanel extends JPanel implements Runnable  {
     private Thread gameThread;
     private KeyHandler keyH = new KeyHandler();
     public Dimension screenSize;
-    private int FPS = 20;
+    public int FPS = 20;
     private MouseHandler mouseH = new MouseHandler();
-    Player player = new Player(this, keyH, mouseH);
-    TitleScreen ts = new TitleScreen(this,mouseH);
+    Player player;
+    TitleScreen ts;
+    World world;
     int screenGame = 0;
 
-    public GamePanel(JFrame window) {
+    public GamePanel(JFrame window) throws IOException {
         GraphicsDevice device = window.getGraphicsConfiguration().getDevice();
         if (device.isFullScreenSupported()) {
             device.setFullScreenWindow(window);
@@ -29,7 +30,9 @@ public class GamePanel extends JPanel implements Runnable  {
             screenSize = new Dimension(1200, 1000);
             this.setPreferredSize(screenSize);
         }
-
+        world = new World(this, keyH, mouseH,player);
+        player = new Player(this, keyH, mouseH,world);
+        ts = new TitleScreen(this, mouseH);
         this.setDoubleBuffered(true);
         this.setBackground(Color.black);
         this.addKeyListener(keyH);
@@ -74,7 +77,7 @@ public class GamePanel extends JPanel implements Runnable  {
                 ts.draw(g2);
             }
             if (screenGame == 1) {
-                
+                world.draw(g2);
                 player.draw(g2);
             }
             
