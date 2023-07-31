@@ -10,12 +10,11 @@ public class Player extends Entitiy {
     String direction;
     MouseHandler mouseH;
     World world;
-    public boolean jump = true;
-    public boolean gravity = true;
-    public int grassTile = 0;
-    public int[][] nearTiles = new int[3][3];
+    public int gravity;
     public boolean collisionLeft;
     public boolean collisionRight;
+    private boolean isJumping = false;
+    public int dx = 0;
 
     public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseH, World world) {
         this.gp = gp;
@@ -23,6 +22,7 @@ public class Player extends Entitiy {
         this.direction = "";
         this.mouseH = mouseH;
         this.world = world;
+        gravity = world.scale * 2;
         setDefaultValues();
     }
 
@@ -34,9 +34,10 @@ public class Player extends Entitiy {
     }
 
     public void ground() {
-        if (world.getTileBeneath(x, y) != 2) {
+        if (world.getTileBeneath(x, y, 1) != 2) {
             y += world.scale;
         } else {
+            gravity = world.scale * 2;
             y += 0;
         }
 
@@ -51,11 +52,6 @@ public class Player extends Entitiy {
         } else {
             collisionRight = false;
         }
-        if (world.getTileUp(x, y) != 3) {
-            jump = false;
-        } else {
-            jump = true;
-        }
         if (world.getTilePerson(x, y, 1) != 3 && world.getTilePerson(x, y, 2) != 3) {
             collisionLeft = true;
             collisionRight = true;
@@ -64,6 +60,27 @@ public class Player extends Entitiy {
 
     public void update() {
         ground();
+
+        boolean canJump = !isJumping && world.getTileBeneath(x, y, 1) != 3;
+
+        if (canJump && keyH.jumpPressed && world.getTilePerson(x, y, 2) == 3 && world.getTileBeneath(x, y, 1) != 3
+                && world.getTileBeneath(x, y, 2) != 3 && world.getTilePerson(x, y, 1) == 3) {
+            isJumping = true;
+            y -= world.scale * 2;
+        }
+
+        if (isJumping) {
+            y -= gravity;
+    
+            if (world.getTileBeneath(x, y, 1) == 3) {
+                y += world.scale;
+                isJumping = false;
+            }
+            // Adjust the collision for jumping to the right
+            if (keyH.jumpPressed && keyH.rightPressed && world.getTileRight(x, y - gravity, 1) == 3) {
+                isJumping = false;
+            }
+        }
 
         if (keyH.leftPressed && !collisionLeft) {
             direction = "left";
@@ -78,6 +95,10 @@ public class Player extends Entitiy {
         } else {
             direction = "right";
             x += 0;
+        }
+
+        if (keyH.jumpPressed) {
+            direction = "jump";
         }
 
         if (!keyH.upPressed && !keyH.downPressed && !keyH.leftPressed && !keyH.rightPressed && !keyH.jumpPressed) {
@@ -115,6 +136,12 @@ public class Player extends Entitiy {
                         images[i] = ImageIO
                                 .read(getClass().getResourceAsStream("Photos/Player/Jump/0" + i + "_Jump.png"));
                     }
+                } else {
+                    images = new BufferedImage[7];
+                    for (int i = 0; i < 7; i++) {
+                        images[i] = ImageIO
+                                .read(getClass().getResourceAsStream("Photos/Player/Jump/0" + i + "_Jump.png"));
+                    }
                 }
                 break;
             case "idle":
@@ -143,9 +170,7 @@ public class Player extends Entitiy {
 
             BufferedImage currentImage = images[currentFrame];
 
-            // Adjust y-coordinate to appear on top of the grass
-            int offsetY = world.scale - world.scale / 2 - world.scale / 4; // Set the desired offset (height of the
-                                                                           // grass tiles)
+            int offsetY = world.scale - world.scale / 2 - world.scale / 4;
             if (keyH.leftPressed) {
                 g2.drawImage(currentImage, x + world.scale * 2 + world.scale / 2, y - offsetY,
                         world.scale * -3,

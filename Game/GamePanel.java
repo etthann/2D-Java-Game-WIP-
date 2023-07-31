@@ -11,7 +11,7 @@ public class GamePanel extends JPanel implements Runnable  {
     private Thread gameThread;
     private KeyHandler keyH = new KeyHandler();
     public Dimension screenSize;
-    public int FPS = 20;
+    public int FPS = 10;
     private MouseHandler mouseH = new MouseHandler();
     Player player;
     TitleScreen ts;
@@ -30,8 +30,9 @@ public class GamePanel extends JPanel implements Runnable  {
             screenSize = new Dimension(1200, 1000);
             this.setPreferredSize(screenSize);
         }
-        world = new World(this, keyH, mouseH,player);
-        player = new Player(this, keyH, mouseH,world);
+
+        world = new World(this, keyH, mouseH, player);
+        player = new Player(this, keyH, mouseH, world);
         ts = new TitleScreen(this, mouseH);
         this.setDoubleBuffered(true);
         this.setBackground(Color.black);
@@ -60,7 +61,8 @@ public class GamePanel extends JPanel implements Runnable  {
             delta += (currentTime - lastTime)/interval;
             lastTime = currentTime;
             if (delta >= 1 ) {
-                player.update();   
+                player.update();
+                world.update();
                 repaint();
                 delta--;
             }
